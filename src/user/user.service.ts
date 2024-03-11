@@ -15,7 +15,7 @@ export class UserService {
       password: createUserDto.password,
       version: 1,
       createdAt: Date.now(),
-      updatedAt: 0,
+      updatedAt: Date.now(),
     };
 
     this.users.push(user);

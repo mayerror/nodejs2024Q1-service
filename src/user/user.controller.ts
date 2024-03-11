@@ -11,6 +11,8 @@ import {
   Put,
   ForbiddenException,
   HttpCode,
+  ValidationPipe,
+  UsePipes,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -23,6 +25,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
+  @UsePipes(new ValidationPipe())
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
@@ -41,6 +44,7 @@ export class UserController {
   }
 
   @Put(':id')
+  @UsePipes(new ValidationPipe())
   update(
     @Param('id') id: string,
     @Body() updatePasswordDto: UpdatePasswordDto,
