@@ -9,10 +9,12 @@ import {
   HttpStatus,
   NotFoundException,
   Put,
+  ForbiddenException,
+  HttpCode,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdatePasswordDto } from './dto/update-user.dto';
 import { validate as isValidUUID } from 'uuid';
 import { User } from './entities/user.entity';
 
@@ -39,15 +41,23 @@ export class UserController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    this.ExceptionsCheck(id);
-    return this.userService.update(id, updateUserDto);
+  update(
+    @Param('id') id: string,
+    @Body() updatePasswordDto: UpdatePasswordDto,
+  ) {
+    this.NotUuidCheck(id);
+    const user = this.userService.findOne(id);
+    this.NotFoundCheck(user, id);
+    this.PasswordCheck(id, updatePasswordDto);
+    return this.userService.update(id, updatePasswordDto);
   }
 
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   remove(@Param('id') id: string) {
     this.ExceptionsCheck(id);
-    return this.userService.remove(id);
+    this.userService.remove(id);
+    return null;
   }
 
   private ExceptionsCheck(id: string) {
@@ -55,6 +65,15 @@ export class UserController {
     const user = this.userService.findOne(id);
     this.NotFoundCheck(user, id);
     return user;
+  }
+
+  private PasswordCheck(id: string, updatePasswordDto: UpdatePasswordDto) {
+    if (!this.userService.isUserPassMatch(id, updatePasswordDto)) {
+      throw new ForbiddenException({
+        statusCode: HttpStatus.FORBIDDEN,
+        message: `ERROR: password is wrong`,
+      });
+    }
   }
 
   private NotUuidCheck(id: string) {

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { v4 as uuidv4 } from 'uuid';
+import { UpdatePasswordDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -33,12 +33,23 @@ export class UserService {
     return this.removePassword(user);
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  update(id: string, updatePasswordDto: UpdatePasswordDto) {
+    const user = this.users.find((user) => user.id === id);
+    user.password = updatePasswordDto.newPassword;
+    user.updatedAt = Date.now();
+    user.version++;
+    return this.removePassword(user);
   }
 
   remove(id: string) {
-    return `This action removes a #${id} user`;
+    const index = this.users.findIndex((user) => user.id === id);
+    this.users.splice(index, 1);
+  }
+
+  isUserPassMatch(id: string, updatePasswordDto: UpdatePasswordDto) {
+    const { oldPassword } = updatePasswordDto;
+    const user = this.users.find((user) => user.id === id);
+    return oldPassword === user.password;
   }
 
   private removePassword(user?: User) {
