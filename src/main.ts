@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import path from 'node:path';
+import 'dotenv/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,7 +16,7 @@ async function bootstrap() {
   // SwaggerModule.setup('api', app, document, {
   //   yamlDocumentUrl: require('../doc/api.yaml'),
   // });
-
-  await app.listen(4000);
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
 }
 bootstrap();
