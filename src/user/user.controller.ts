@@ -1,7 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  BadRequestException,
+  HttpStatus,
+  NotFoundException,
+  Put,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { validate as isValidUUID } from 'uuid';
+import { User } from './entities/user.entity';
 
 @Controller('user')
 export class UserController {
@@ -19,16 +32,46 @@ export class UserController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+    this.NotUuidCheck(id);
+    const user = this.userService.findOne(id);
+    this.NotFoundCheck(user, id);
+    return user;
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+    this.ExceptionsCheck(id);
+    return this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+    this.ExceptionsCheck(id);
+    return this.userService.remove(id);
+  }
+
+  private ExceptionsCheck(id: string) {
+    this.NotUuidCheck(id);
+    const user = this.userService.findOne(id);
+    this.NotFoundCheck(user, id);
+    return user;
+  }
+
+  private NotUuidCheck(id: string) {
+    if (!isValidUUID(id)) {
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `ERROR: userId = ${id} is invalid (not uuid)`,
+      });
+    }
+  }
+
+  private NotFoundCheck(user: User | Partial<User>, id: string) {
+    if (user === undefined) {
+      throw new NotFoundException({
+        statusCode: HttpStatus.NOT_FOUND,
+        message: `ERROR: user with userId = ${id} doesn't exist`,
+      });
+    }
   }
 }
