@@ -53,6 +53,7 @@ export class AlbumController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   remove(@Param('id') id: string) {
+    this.ExceptionsCheck(id);
     return this.albumService.remove(id);
   }
 
