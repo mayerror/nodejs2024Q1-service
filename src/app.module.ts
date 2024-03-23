@@ -10,12 +10,20 @@ import { join } from 'node:path';
 import { FavsModule } from './favs/favs.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './user/entities/user.entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'postgres',
+      host: 'localhost',
+      port: 5433,
+      username: 'postgres',
+      password: 'postgres',
+      database: 'postgres',
+      entities: [User],
+      synchronize: true,
     }),
     UserModule,
     ArtistModule,

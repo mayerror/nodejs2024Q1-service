@@ -13,6 +13,8 @@ import {
   HttpCode,
   ValidationPipe,
   UsePipes,
+  ClassSerializerInterceptor,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -36,25 +38,25 @@ export class UserController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     this.NotUuidCheck(id);
-    const user = this.userService.findOne(id);
+    const user = await this.userService.findOne(id);
     this.NotFoundCheck(user, id);
     return user;
   }
 
-  @Put(':id')
-  @UsePipes(new ValidationPipe())
-  update(
-    @Param('id') id: string,
-    @Body() updatePasswordDto: UpdatePasswordDto,
-  ) {
-    this.NotUuidCheck(id);
-    const user = this.userService.findOne(id);
-    this.NotFoundCheck(user, id);
-    this.PasswordCheck(id, updatePasswordDto);
-    return this.userService.update(id, updatePasswordDto);
-  }
+  // @Put(':id')
+  // @UsePipes(new ValidationPipe())
+  // async update(
+  //   @Param('id') id: string,
+  //   @Body() updatePasswordDto: UpdatePasswordDto,
+  // ) {
+  //   this.NotUuidCheck(id);
+  //   const user = await this.userService.findOne(id);
+  //   this.NotFoundCheck(user, id);
+  //   this.PasswordCheck(id, updatePasswordDto);
+  //   return await this.userService.update(id, updatePasswordDto);
+  // }
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
@@ -64,21 +66,21 @@ export class UserController {
     return null;
   }
 
-  private ExceptionsCheck(id: string) {
+  private async ExceptionsCheck(id: string) {
     this.NotUuidCheck(id);
-    const user = this.userService.findOne(id);
+    const user = await this.userService.findOne(id);
     this.NotFoundCheck(user, id);
     return user;
   }
 
-  private PasswordCheck(id: string, updatePasswordDto: UpdatePasswordDto) {
-    if (!this.userService.isUserPassMatch(id, updatePasswordDto)) {
-      throw new ForbiddenException({
-        statusCode: HttpStatus.FORBIDDEN,
-        message: `ERROR: password is wrong`,
-      });
-    }
-  }
+  // private PasswordCheck(id: string, updatePasswordDto: UpdatePasswordDto) {
+  //   if (!this.userService.isUserPassMatch(id, updatePasswordDto)) {
+  //     throw new ForbiddenException({
+  //       statusCode: HttpStatus.FORBIDDEN,
+  //       message: `ERROR: password is wrong`,
+  //     });
+  //   }
+  // }
 
   private NotUuidCheck(id: string) {
     if (!isValidUUID(id)) {
