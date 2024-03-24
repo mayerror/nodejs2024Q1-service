@@ -36,31 +36,28 @@ export class AlbumController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     this.NotUuidCheck(id);
-    const album = this.albumService.findOne(id);
-    this.NotFoundCheck(album, id);
-    return this.albumService.findOne(id);
+    const album = await this.albumService.findOne(id);
+    return album;
   }
 
   @Put(':id')
   @UsePipes(new ValidationPipe())
-  update(@Param('id') id: string, @Body() updateAlbumDto: UpdateAlbumDto) {
-    this.ExceptionsCheck(id);
-    return this.albumService.update(id, updateAlbumDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateAlbumDto: UpdateAlbumDto,
+  ) {
+    this.NotUuidCheck(id);
+    return await this.albumService.update(id, updateAlbumDto);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    this.ExceptionsCheck(id);
-    return this.albumService.remove(id);
-  }
-
-  private ExceptionsCheck(id: string) {
+  async remove(@Param('id') id: string) {
     this.NotUuidCheck(id);
-    const album = this.albumService.findOne(id);
-    this.NotFoundCheck(album, id);
+    await this.albumService.remove(id);
+    return null;
   }
 
   private NotUuidCheck(id: string) {
@@ -68,15 +65,6 @@ export class AlbumController {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `ERROR: albumId = ${id} is invalid (not uuid)`,
-      });
-    }
-  }
-
-  private NotFoundCheck(album: Album | Partial<Album>, id: string) {
-    if (album === undefined) {
-      throw new NotFoundException({
-        statusCode: HttpStatus.NOT_FOUND,
-        message: `ERROR: album with albumId = ${id} doesn't exist`,
       });
     }
   }

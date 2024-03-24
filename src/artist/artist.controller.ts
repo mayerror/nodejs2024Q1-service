@@ -9,7 +9,6 @@ import {
   ValidationPipe,
   UsePipes,
   BadRequestException,
-  NotFoundException,
   HttpStatus,
   HttpCode,
 } from '@nestjs/common';
@@ -17,7 +16,6 @@ import { ArtistService } from './artist.service';
 import { validate as isValidUUID } from 'uuid';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
-import { Artist } from './entities/artist.entity';
 
 @Controller('artist')
 export class ArtistController {

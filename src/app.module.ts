@@ -13,6 +13,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user/entities/user.entity';
 import { Track } from './track/entities/track.entity';
 import { Artist } from './artist/entities/artist.entity';
+import { Album } from './album/entities/album.entity';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { Artist } from './artist/entities/artist.entity';
       username: 'postgres',
       password: 'postgres',
       database: 'postgres',
-      entities: [User, Track, Artist],
+      entities: [User, Track, Artist, Album],
       synchronize: true,
     }),
     UserModule,

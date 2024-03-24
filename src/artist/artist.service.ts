@@ -6,7 +6,6 @@ import {
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artist } from './entities/artist.entity';
-import { v4 as uuidv4 } from 'uuid';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -54,12 +53,12 @@ export class ArtistService {
   }
 
   async artistExistCheck(id: string) {
-    const track = await this.artistsRepository.findOneBy({ id });
-    if (!track) {
+    const artist = await this.artistsRepository.findOneBy({ id });
+    if (!artist) {
       throw new NotFoundException(
         `ERROR: artist with artistId = ${id} doesn't exist`,
       );
     }
-    return track;
+    return artist;
   }
 }

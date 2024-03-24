@@ -1,44 +1,65 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './entities/album.entity';
-import { v4 as uuidv4 } from 'uuid';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AlbumService {
-  private readonly albums: Album[] = [];
+  constructor(
+    @InjectRepository(Album)
+    private albumsRepository: Repository<Album>,
+  ) {}
 
   create(createAlbumDto: CreateAlbumDto) {
-    const album: Album = {
-      id: uuidv4(),
-      name: createAlbumDto.name,
-      year: createAlbumDto.year,
-      artistId: createAlbumDto.artistId,
-    };
+    const { name, year, artistId } = createAlbumDto;
+    const album = this.albumsRepository.create({ name, year, artistId });
 
-    this.albums.push(album);
-    return album;
+    if (!album) {
+      throw new BadRequestException('ERROR: invalid request body');
+    }
+
+    return this.albumsRepository.save(album);
   }
 
   findAll() {
-    return this.albums;
+    return this.albumsRepository.find();
   }
 
-  findOne(id: string) {
-    const album = this.albums.find((album) => album.id === id);
+  async findOne(id: string) {
+    const album = await this.albumExistCheck(id);
     return album;
   }
 
-  update(id: string, updateAlbumDto: UpdateAlbumDto) {
-    const album = this.albums.find((album) => album.id === id);
-    album.name = updateAlbumDto.name;
-    album.year = updateAlbumDto.year;
-    album.artistId = updateAlbumDto.artistId;
-    return album;
+  async update(id: string, updateAlbumDto: UpdateAlbumDto) {
+    const { name, year, artistId } = updateAlbumDto;
+    await this.albumExistCheck(id);
+    await this.albumsRepository.update(id, {
+      name,
+      year,
+      artistId,
+    });
+
+    return await this.albumsRepository.findOneBy({ id });
   }
 
-  remove(id: string) {
-    const index = this.albums.findIndex((album) => album.id === id);
-    this.albums.splice(index, 1);
+  async remove(id: string) {
+    await this.albumExistCheck(id);
+    await this.albumsRepository.delete(id);
+  }
+
+  async albumExistCheck(id: string) {
+    const album = await this.albumsRepository.findOneBy({ id });
+    if (!album) {
+      throw new NotFoundException(
+        `ERROR: album with albumId = ${id} doesn't exist`,
+      );
+    }
+    return album;
   }
 }
