@@ -35,32 +35,28 @@ export class ArtistController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     this.NotUuidCheck(id);
-    const artist = this.artistService.findOne(id);
-    this.NotFoundCheck(artist, id);
-    return this.artistService.findOne(id);
+    const artist = await this.artistService.findOne(id);
+    return artist;
   }
 
   @Put(':id')
   @UsePipes(new ValidationPipe())
-  update(@Param('id') id: string, @Body() updateArtistDto: UpdateArtistDto) {
-    this.ExceptionsCheck(id);
-    return this.artistService.update(id, updateArtistDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateArtistDto: UpdateArtistDto,
+  ) {
+    this.NotUuidCheck(id);
+    return await this.artistService.update(id, updateArtistDto);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    this.ExceptionsCheck(id);
-    this.artistService.remove(id);
-    return null;
-  }
-
-  private ExceptionsCheck(id: string) {
+  async remove(@Param('id') id: string) {
     this.NotUuidCheck(id);
-    const artist = this.artistService.findOne(id);
-    this.NotFoundCheck(artist, id);
+    await this.artistService.remove(id);
+    return null;
   }
 
   private NotUuidCheck(id: string) {
@@ -68,15 +64,6 @@ export class ArtistController {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `ERROR: artistId = ${id} is invalid (not uuid)`,
-      });
-    }
-  }
-
-  private NotFoundCheck(artist: Artist | Partial<Artist>, id: string) {
-    if (artist === undefined) {
-      throw new NotFoundException({
-        statusCode: HttpStatus.NOT_FOUND,
-        message: `ERROR: artist with artistId = ${id} doesn't exist`,
       });
     }
   }

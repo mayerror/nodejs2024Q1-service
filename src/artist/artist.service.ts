@@ -1,42 +1,65 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artist } from './entities/artist.entity';
 import { v4 as uuidv4 } from 'uuid';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ArtistService {
-  private readonly artists: Artist[] = [];
+  constructor(
+    @InjectRepository(Artist)
+    private artistsRepository: Repository<Artist>,
+  ) {}
 
   create(createArtistDto: CreateArtistDto) {
-    const artist: Artist = {
-      id: uuidv4(),
-      name: createArtistDto.name,
-      grammy: createArtistDto.grammy,
-    };
+    const { name, grammy } = createArtistDto;
+    const artist = this.artistsRepository.create({ name, grammy });
 
-    this.artists.push(artist);
-    return artist;
+    if (!artist) {
+      throw new BadRequestException('ERROR: invalid request body');
+    }
+
+    return this.artistsRepository.save(artist);
   }
 
   findAll() {
-    return this.artists;
+    return this.artistsRepository.find();
   }
 
-  findOne(id: string) {
-    const artist = this.artists.find((artist) => artist.id === id);
+  async findOne(id: string) {
+    const artist = await this.artistExistCheck(id);
     return artist;
   }
 
-  update(id: string, updateArtistDto: UpdateArtistDto) {
-    const artist = this.artists.find((artist) => artist.id === id);
-    artist.name = updateArtistDto.name;
-    artist.grammy = updateArtistDto.grammy;
-    return artist;
+  async update(id: string, updateArtistDto: UpdateArtistDto) {
+    const { name, grammy } = updateArtistDto;
+    await this.artistExistCheck(id);
+    await this.artistsRepository.update(id, {
+      name,
+      grammy,
+    });
+
+    return await this.artistsRepository.findOneBy({ id });
   }
 
-  remove(id: string) {
-    const index = this.artists.findIndex((artist) => artist.id === id);
-    this.artists.splice(index, 1);
+  async remove(id: string) {
+    await this.artistExistCheck(id);
+    await this.artistsRepository.delete(id);
+  }
+
+  async artistExistCheck(id: string) {
+    const track = await this.artistsRepository.findOneBy({ id });
+    if (!track) {
+      throw new NotFoundException(
+        `ERROR: artist with artistId = ${id} doesn't exist`,
+      );
+    }
+    return track;
   }
 }
