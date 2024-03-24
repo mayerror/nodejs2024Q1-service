@@ -11,6 +11,7 @@ import { FavsModule } from './favs/favs.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user/entities/user.entity';
+import { Track } from './track/entities/track.entity';
 
 @Module({
   imports: [
@@ -22,16 +23,13 @@ import { User } from './user/entities/user.entity';
       username: 'postgres',
       password: 'postgres',
       database: 'postgres',
-      entities: [User],
+      entities: [User, Track],
       synchronize: true,
     }),
     UserModule,
-    ArtistModule,
     TrackModule,
+    ArtistModule,
     AlbumModule,
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'doc'),
-    }),
     FavsModule,
   ],
   controllers: [AppController],

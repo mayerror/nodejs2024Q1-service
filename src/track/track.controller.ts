@@ -6,7 +6,6 @@ import {
   Param,
   Delete,
   BadRequestException,
-  NotFoundException,
   HttpStatus,
   ValidationPipe,
   UsePipes,
@@ -17,7 +16,6 @@ import { TrackService } from './track.service';
 import { validate as isValidUUID } from 'uuid';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { Track } from './entities/track.entity';
 
 @Controller('track')
 export class TrackController {
@@ -35,32 +33,28 @@ export class TrackController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     this.NotUuidCheck(id);
-    const track = this.trackService.findOne(id);
-    this.NotFoundCheck(track, id);
-    return this.trackService.findOne(id);
+    const user = await this.trackService.findOne(id);
+    return user;
   }
 
   @Put(':id')
   @UsePipes(new ValidationPipe())
-  update(@Param('id') id: string, @Body() updateTrackDto: UpdateTrackDto) {
-    this.ExceptionsCheck(id);
-    return this.trackService.update(id, updateTrackDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateTrackDto: UpdateTrackDto,
+  ) {
+    this.NotUuidCheck(id);
+    return await this.trackService.update(id, updateTrackDto);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    this.ExceptionsCheck(id);
-    this.trackService.remove(id);
-    return null;
-  }
-
-  private ExceptionsCheck(id: string) {
+  async remove(@Param('id') id: string) {
     this.NotUuidCheck(id);
-    const track = this.trackService.findOne(id);
-    this.NotFoundCheck(track, id);
+    await this.trackService.remove(id);
+    return null;
   }
 
   private NotUuidCheck(id: string) {
@@ -68,15 +62,6 @@ export class TrackController {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `ERROR: trackId = ${id} is invalid (not uuid)`,
-      });
-    }
-  }
-
-  private NotFoundCheck(track: Track | Partial<Track>, id: string) {
-    if (track === undefined) {
-      throw new NotFoundException({
-        statusCode: HttpStatus.NOT_FOUND,
-        message: `ERROR: track with trackId = ${id} doesn't exist`,
       });
     }
   }

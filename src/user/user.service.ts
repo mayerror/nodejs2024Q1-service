@@ -5,8 +5,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { User } from './entities/user.entity';
 import { UpdatePasswordDto } from './dto/update-user.dto';
+import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -24,11 +24,6 @@ export class UserService {
   async findOne(id: string): Promise<User | null> {
     const user = await this.userExistCheck(id);
     return user;
-  }
-
-  async remove(id: string): Promise<void> {
-    await this.userExistCheck(id);
-    await this.usersRepository.delete(id);
   }
 
   create(createUserDto: CreateUserDto): Promise<User> {
@@ -60,6 +55,11 @@ export class UserService {
     });
 
     return await this.usersRepository.findOneBy({ id });
+  }
+
+  async remove(id: string): Promise<void> {
+    await this.userExistCheck(id);
+    await this.usersRepository.delete(id);
   }
 
   async isUserPassMatch(id: string, updatePasswordDto: UpdatePasswordDto) {

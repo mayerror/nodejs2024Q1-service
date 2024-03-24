@@ -29,8 +29,8 @@ export class FavsController {
   ) {}
 
   @Get()
-  findAll() {
-    const tracks = this.trackService.findAll();
+  async findAll() {
+    const tracks = await this.trackService.findAll();
     const albums = this.albumService.findAll();
     const artists = this.artistService.findAll();
     return this.favsService.findAll(tracks, albums, artists);

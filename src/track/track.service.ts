@@ -1,46 +1,71 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './entities/track.entity';
-import { v4 as uuidv4 } from 'uuid';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TrackService {
-  private readonly tracks: Track[] = [];
+  constructor(
+    @InjectRepository(Track)
+    private tracksRepository: Repository<Track>,
+  ) {}
 
   create(createTrackDto: CreateTrackDto) {
-    const track: Track = {
-      id: uuidv4(),
+    const track = this.tracksRepository.create({
       name: createTrackDto.name,
       artistId: createTrackDto.artistId,
       albumId: createTrackDto.albumId,
       duration: createTrackDto.duration,
-    };
+    });
 
-    this.tracks.push(track);
-    return track;
+    if (!track) {
+      throw new BadRequestException('ERROR: invalid request body');
+    }
+
+    return this.tracksRepository.save(track);
   }
 
   findAll() {
-    return this.tracks;
+    return this.tracksRepository.find();
   }
 
-  findOne(id: string) {
-    const track = this.tracks.find((track) => track.id === id);
+  async findOne(id: string) {
+    const track = await this.trackExistCheck(id);
     return track;
   }
 
-  update(id: string, updateTrackDto: UpdateTrackDto) {
-    const track = this.tracks.find((track) => track.id === id);
-    track.name = updateTrackDto.name;
-    track.artistId = updateTrackDto.artistId;
-    track.albumId = updateTrackDto.albumId;
-    track.duration = updateTrackDto.duration;
-    return track;
+  async update(id: string, updateTrackDto: UpdateTrackDto) {
+    const { name, artistId, albumId, duration } = updateTrackDto;
+
+    await this.trackExistCheck(id);
+    await this.tracksRepository.update(id, {
+      name,
+      artistId,
+      albumId,
+      duration,
+    });
+
+    return await this.tracksRepository.findOneBy({ id });
   }
 
-  remove(id: string) {
-    const index = this.tracks.findIndex((track) => track.id === id);
-    this.tracks.splice(index, 1);
+  async remove(id: string) {
+    await this.trackExistCheck(id);
+    await this.tracksRepository.delete(id);
+  }
+
+  async trackExistCheck(id: string) {
+    const track = await this.tracksRepository.findOneBy({ id });
+    if (!track) {
+      throw new NotFoundException(
+        `ERROR: track with trackId = ${id} doesn't exist`,
+      );
+    }
+    return track;
   }
 }
