@@ -88,9 +88,9 @@ export class FavsController {
 
   @Post('artist/:id')
   @UsePipes(new ValidationPipe())
-  createArtist(@Param('id') id: string) {
+  async createArtist(@Param('id') id: string) {
     this.NotUuidCheck(id);
-    const artist = this.artistService.findOne(id);
+    const artist = await this.artistService.findOne(id);
     if (artist === undefined) {
       throw new NotFoundException({
         statusCode: HttpStatus.UNPROCESSABLE_ENTITY,

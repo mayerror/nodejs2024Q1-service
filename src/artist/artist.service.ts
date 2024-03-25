@@ -32,8 +32,7 @@ export class ArtistService {
   }
 
   async findOne(id: string) {
-    const artist = await this.artistExistCheck(id);
-    return artist;
+    return await this.artistExistCheck(id);
   }
 
   async update(id: string, updateArtistDto: UpdateArtistDto) {
