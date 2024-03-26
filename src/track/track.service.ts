@@ -40,6 +40,10 @@ export class TrackService {
     return track;
   }
 
+  async findOneWitoutCheck(id: string) {
+    return await this.tracksRepository.findOneBy({ id });
+  }
+
   async update(id: string, updateTrackDto: UpdateTrackDto) {
     const { name, artistId, albumId, duration } = updateTrackDto;
 

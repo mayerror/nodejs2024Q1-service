@@ -12,6 +12,7 @@ import {
   HttpStatus,
   NotFoundException,
   HttpCode,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { FavsService } from './favs.service';
 import { validate as isValidUUID } from 'uuid';
@@ -40,9 +41,9 @@ export class FavsController {
   @UsePipes(new ValidationPipe())
   async createTrack(@Param('id') id: string) {
     this.NotUuidCheck(id);
-    const track = await this.trackService.findOne(id);
-    if (track === undefined) {
-      throw new NotFoundException({
+    const track = await this.trackService.findOneWitoutCheck(id);
+    if (!track) {
+      throw new UnprocessableEntityException({
         statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
         message: `ERROR: track with trackId = ${id} doesn't exist`,
       });
@@ -64,9 +65,9 @@ export class FavsController {
   @UsePipes(new ValidationPipe())
   async createAlbum(@Param('id') id: string) {
     this.NotUuidCheck(id);
-    const album = await this.albumService.findOne(id);
-    if (album === undefined) {
-      throw new NotFoundException({
+    const album = await this.albumService.findOneWitoutCheck(id);
+    if (!album) {
+      throw new UnprocessableEntityException({
         statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
         message: `ERROR: album with albumId = ${id} doesn't exist`,
       });
@@ -88,9 +89,9 @@ export class FavsController {
   @UsePipes(new ValidationPipe())
   async createArtist(@Param('id') id: string) {
     this.NotUuidCheck(id);
-    const artist = await this.artistService.findOne(id);
-    if (artist === undefined) {
-      throw new NotFoundException({
+    const artist = await this.artistService.findOneWitoutCheck(id);
+    if (!artist) {
+      throw new UnprocessableEntityException({
         statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
         message: `ERROR: artist with albumId = ${id} doesn't exist`,
       });
@@ -119,7 +120,7 @@ export class FavsController {
 
   private NotFoundCheck(id: string) {
     throw new NotFoundException({
-      statusCode: HttpStatus.NOT_FOUND,
+      statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
       message: `ERROR: Id = ${id} is not favorite`,
     });
   }

@@ -36,6 +36,10 @@ export class AlbumService {
     return album;
   }
 
+  async findOneWitoutCheck(id: string) {
+    return await this.albumsRepository.findOneBy({ id });
+  }
+
   async update(id: string, updateAlbumDto: UpdateAlbumDto) {
     const { name, year, artistId } = updateAlbumDto;
     await this.albumExistCheck(id);

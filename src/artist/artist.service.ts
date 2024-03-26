@@ -35,6 +35,10 @@ export class ArtistService {
     return await this.artistExistCheck(id);
   }
 
+  async findOneWitoutCheck(id: string) {
+    return await this.artistsRepository.findOneBy({ id });
+  }
+
   async update(id: string, updateArtistDto: UpdateArtistDto) {
     const { name, grammy } = updateArtistDto;
     await this.artistExistCheck(id);
