@@ -53,8 +53,15 @@ export class UserService {
       password: updatePasswordDto.newPassword,
       updatedAt: Date.now(),
     });
+    const user = await this.usersRepository.findOneBy({ id });
 
-    return await this.usersRepository.findOneBy({ id });
+    return {
+      id: user.id,
+      login: user.login,
+      version: user.version,
+      updatedAt: Number(user.updatedAt),
+      createdAt: Number(user.createdAt),
+    };
   }
 
   async remove(id: string): Promise<void> {
