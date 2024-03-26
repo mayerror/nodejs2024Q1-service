@@ -38,52 +38,50 @@ export class FavsController {
 
   @Post('track/:id')
   @UsePipes(new ValidationPipe())
-  createTrack(@Param('id') id: string) {
+  async createTrack(@Param('id') id: string) {
     this.NotUuidCheck(id);
-    const track = this.trackService.findOne(id);
+    const track = await this.trackService.findOne(id);
     if (track === undefined) {
       throw new NotFoundException({
         statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
         message: `ERROR: track with trackId = ${id} doesn't exist`,
       });
     }
-    return this.favsService.createTrack(id);
+    return await this.favsService.createTrack(id);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete(':id')
-  removeTrack(@Param('id') id: string) {
+  @Delete('track/:id')
+  async removeTrack(@Param('id') id: string) {
     this.NotUuidCheck(id);
-    if (!this.favsService.isTrackFav(id)) {
+    if (!(await this.favsService.isTrackFav(id))) {
       this.NotFoundCheck(id);
     }
-    this.favsService.removeTrack(id);
-    return null;
+    return await this.favsService.removeTrack(id);
   }
 
   @Post('album/:id')
   @UsePipes(new ValidationPipe())
-  createAlbum(@Param('id') id: string) {
+  async createAlbum(@Param('id') id: string) {
     this.NotUuidCheck(id);
-    const album = this.albumService.findOne(id);
+    const album = await this.albumService.findOne(id);
     if (album === undefined) {
       throw new NotFoundException({
         statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
         message: `ERROR: album with albumId = ${id} doesn't exist`,
       });
     }
-    return this.favsService.createAlbum(id);
+    return await this.favsService.createAlbum(id);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('album/:id')
-  removeAlbum(@Param('id') id: string) {
+  async removeAlbum(@Param('id') id: string) {
     this.NotUuidCheck(id);
-    if (!this.favsService.isAlbumFav(id)) {
+    if (!(await this.favsService.isAlbumFav(id))) {
       this.NotFoundCheck(id);
     }
-    this.favsService.removeAlbum(id);
-    return null;
+    return await this.favsService.removeAlbum(id);
   }
 
   @Post('artist/:id')
@@ -97,18 +95,17 @@ export class FavsController {
         message: `ERROR: artist with albumId = ${id} doesn't exist`,
       });
     }
-    return this.favsService.createArtist(id);
+    return await this.favsService.createArtist(id);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('artist/:id')
-  removeArtist(@Param('id') id: string) {
+  async removeArtist(@Param('id') id: string) {
     this.NotUuidCheck(id);
-    if (!this.favsService.isArtistFav(id)) {
+    if (!(await this.favsService.isArtistFav(id))) {
       this.NotFoundCheck(id);
     }
-    this.favsService.removeArtist(id);
-    return null;
+    return await this.favsService.removeArtist(id);
   }
 
   private NotUuidCheck(id: string) {

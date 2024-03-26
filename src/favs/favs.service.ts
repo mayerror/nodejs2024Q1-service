@@ -1,27 +1,31 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateFavDto } from './dto/create-fav.dto';
 import { Favs } from './entities/fav.entity';
 import { Track } from '../track/entities/track.entity';
 import { Album } from '../album/entities/album.entity';
 import { Artist } from '../artist/entities/artist.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class FavsService {
-  private readonly favs: Favs = {
-    tracks: [],
-    albums: [],
-    artists: [],
-  };
+  constructor(
+    @InjectRepository(Favs)
+    private favsRepository: Repository<Favs>,
+  ) {
+    this.initializeFavs();
+  }
 
-  findAll(tracks: Track[], albums: Album[], artists: Artist[]) {
+  async findAll(tracks: Track[], albums: Album[], artists: Artist[]) {
+    const favs = await this.favsRepository.find();
     const favsTracks = tracks.filter((track) =>
-      this.favs.tracks.includes(track.id),
+      favs[0].tracks.includes(track.id),
     );
     const favsAlbums = albums.filter((album) =>
-      this.favs.albums.includes(album.id),
+      favs[0].albums.includes(album.id),
     );
     const favArtists = artists.filter((artist) =>
-      this.favs.artists.includes(artist.id),
+      favs[0].artists.includes(artist.id),
     );
     return {
       artists: favArtists,
@@ -30,45 +34,98 @@ export class FavsService {
     };
   }
 
-  createTrack(id: string) {
-    this.favs.tracks.push(id);
+  async createTrack(id: string) {
+    const favRecord = (await this.favsRepository.find())[0];
+    if (!favRecord) {
+      throw new NotFoundException('ERROR: No favorites record found');
+    }
+    favRecord.tracks.push(id);
+    await this.favsRepository.save(favRecord);
     return 'The track has been successfully added to the collection';
   }
 
-  removeTrack(id: string) {
-    const index = this.favs.tracks.findIndex((track) => track === id);
-    this.favs.tracks.splice(index, 1);
+  async removeTrack(id: string) {
+    const favRecord = (await this.favsRepository.find())[0];
+    if (!favRecord) {
+      throw new NotFoundException('ERROR: No favorites record found');
+    }
+    const index = favRecord.tracks.findIndex((track) => track === id);
+    if (index !== -1) {
+      favRecord.tracks.splice(index, 1);
+      await this.favsRepository.save(favRecord);
+    }
+    return 'The track has been successfully removed from the collection';
   }
 
-  isTrackFav(id: string) {
-    return this.favs.tracks.includes(id);
+  async isTrackFav(id: string) {
+    const favRecord = (await this.favsRepository.find())[0];
+    return favRecord.tracks.includes(id);
   }
 
-  createAlbum(id: string) {
-    this.favs.albums.push(id);
+  async createAlbum(id: string) {
+    const favRecord = (await this.favsRepository.find())[0];
+    if (!favRecord) {
+      throw new NotFoundException('ERROR: No favorites record found');
+    }
+    favRecord.albums.push(id);
+    await this.favsRepository.save(favRecord);
     return 'The album has been successfully added to the collection';
   }
 
-  removeAlbum(id: string) {
-    const index = this.favs.albums.findIndex((album) => album === id);
-    this.favs.albums.splice(index, 1);
+  async removeAlbum(id: string) {
+    const favRecord = (await this.favsRepository.find())[0];
+    if (!favRecord) {
+      throw new NotFoundException('ERROR: No favorites record found');
+    }
+    const index = favRecord.albums.findIndex((album) => album === id);
+    if (index !== -1) {
+      favRecord.albums.splice(index, 1);
+      await this.favsRepository.save(favRecord);
+    }
+    return 'The album has been successfully removed from the collection';
   }
 
-  isAlbumFav(id: string) {
-    return this.favs.albums.includes(id);
+  async isAlbumFav(id: string) {
+    const favRecord = (await this.favsRepository.find())[0];
+    return favRecord.albums.includes(id);
   }
 
-  createArtist(id: string) {
-    this.favs.artists.push(id);
+  async createArtist(id: string) {
+    const favRecord = (await this.favsRepository.find())[0];
+    if (!favRecord) {
+      throw new NotFoundException('ERROR: No favorites record found');
+    }
+    favRecord.artists.push(id);
+    await this.favsRepository.save(favRecord);
     return 'The artist has been successfully added to the collection';
   }
 
-  removeArtist(id: string) {
-    const index = this.favs.artists.findIndex((artist) => artist === id);
-    this.favs.artists.splice(index, 1);
+  async removeArtist(id: string) {
+    const favRecord = (await this.favsRepository.find())[0];
+    if (!favRecord) {
+      throw new NotFoundException('ERROR: No favorites record found');
+    }
+    const index = favRecord.artists.findIndex((artist) => artist === id);
+    if (index !== -1) {
+      favRecord.artists.splice(index, 1);
+      await this.favsRepository.save(favRecord);
+    }
+    return 'The artist has been successfully removed from the collection';
   }
 
-  isArtistFav(id: string) {
-    return this.favs.artists.includes(id);
+  async isArtistFav(id: string) {
+    const favRecord = (await this.favsRepository.find())[0];
+    return favRecord.artists.includes(id);
+  }
+
+  async initializeFavs() {
+    const count = await this.favsRepository.count();
+    if (count === 0) {
+      const favs = new Favs();
+      favs.tracks = [];
+      favs.albums = [];
+      favs.artists = [];
+      await this.favsRepository.save(favs);
+    }
   }
 }

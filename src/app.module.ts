@@ -14,6 +14,7 @@ import { User } from './user/entities/user.entity';
 import { Track } from './track/entities/track.entity';
 import { Artist } from './artist/entities/artist.entity';
 import { Album } from './album/entities/album.entity';
+import { Favs } from './favs/entities/fav.entity';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { Album } from './album/entities/album.entity';
       username: 'postgres',
       password: 'postgres',
       database: 'postgres',
-      entities: [User, Track, Artist, Album],
+      entities: [User, Track, Artist, Album, Favs],
       synchronize: true,
     }),
     UserModule,
