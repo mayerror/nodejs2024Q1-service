@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateFavDto } from './dto/create-fav.dto';
 import { Favs } from './entities/fav.entity';
 import { Track } from '../track/entities/track.entity';
 import { Album } from '../album/entities/album.entity';

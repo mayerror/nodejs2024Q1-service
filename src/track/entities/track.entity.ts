@@ -1,7 +1,5 @@
 import { IAlbum } from 'src/album/entities/IAlbum';
 import { IArtist } from 'src/artist/entities/IArtist';
-import { Artist } from 'src/artist/entities/artist.entity';
-import { User } from 'src/user/entities/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,

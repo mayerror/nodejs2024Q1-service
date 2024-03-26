@@ -1,12 +1,5 @@
 import { Exclude } from 'class-transformer';
-import { Track } from 'src/track/entities/track.entity';
-import {
-  Column,
-  Entity,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  VersionColumn,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, VersionColumn } from 'typeorm';
 
 @Entity()
 export class User {
